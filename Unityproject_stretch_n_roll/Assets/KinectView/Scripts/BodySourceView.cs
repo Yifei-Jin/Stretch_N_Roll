@@ -1,3 +1,4 @@
+//This is the script used to calculate the gradient and length using the data input from kinect
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,8 +6,9 @@ using Kinect = Windows.Kinect;
 
 public class BodySourceView : MonoBehaviour
 {
-    public static double Length;
-    public static double Gradient;
+    //Variables.............................................................................................................
+    public static double Length;    //the global variable that can be access by other script
+    public static double Gradient;  //the global variable that can be access by other script
     public Material BoneMaterial;
     public GameObject BodySourceManager;
 
@@ -15,13 +17,14 @@ public class BodySourceView : MonoBehaviour
 
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
-
         { Kinect.JointType.HandTipLeft, Kinect.JointType.HandLeft },
         { Kinect.JointType.ThumbLeft, Kinect.JointType.HandLeft },
         { Kinect.JointType.HandTipRight, Kinect.JointType.HandRight },
-        { Kinect.JointType.ThumbRight, Kinect.JointType.HandRight },
+        { Kinect.JointType.ThumbRight, Kinect.JointType.HandRight },    //all the joints we needed for the shoulder extension stretch
     };
 
+
+    //Functions................................................................................................................
     void Update ()
     {
         if (BodySourceManager == null)
@@ -42,6 +45,7 @@ public class BodySourceView : MonoBehaviour
         }
 
         List<ulong> trackedIds = new List<ulong>();
+
         foreach(var body in data)
         {
             if (body == null)
@@ -82,6 +86,7 @@ public class BodySourceView : MonoBehaviour
                 }
 
                 RefreshBodyObject(body, _Bodies[body.TrackingId]);
+
                 Gradient = Get_gradient(body);
                 Length = Get_length(body);
             }
@@ -91,7 +96,6 @@ public class BodySourceView : MonoBehaviour
     private GameObject CreateBodyObject(ulong id)
     {
         GameObject body = new GameObject("Body:" + id);
-
 
         for (Kinect.JointType jt = Kinect.JointType.HandLeft; jt <= Kinect.JointType.HandRight; jt=jt+4)
         {
@@ -106,7 +110,6 @@ public class BodySourceView : MonoBehaviour
             jointObj.name = jt.ToString();
             jointObj.transform.parent = body.transform;
         }
-
         return body;
     }
 
@@ -140,6 +143,7 @@ public class BodySourceView : MonoBehaviour
         }
     }
 
+
     private static Color GetColorForState(Kinect.TrackingState state)
     {
         switch (state)
@@ -155,32 +159,40 @@ public class BodySourceView : MonoBehaviour
         }
     }
 
+
+    //the function used to get the vector contain the joint's position, (x,y,z)
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
     {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
     }
 
+
+    //the function used to calculate the gradient between hands
     private double Get_gradient(Kinect.Body body)
     {
       Kinect.Joint sjt1 = body.Joints[Kinect.JointType.HandRight];
       Kinect.Joint sjt2 = body.Joints[Kinect.JointType.HandLeft];
-
+        //get the position of hands
       Vector3 righthand = GetVector3FromJoint(sjt1);
       Vector3 lefthand = GetVector3FromJoint(sjt2);
+        //create a new vector contain 2D position of lefthand and righthand
       Vector4 positions = new Vector4(lefthand.x, lefthand.y, righthand.x, righthand.y);
-      double grad = (positions.w-positions.y)/(positions.z-positions.x);
+        //gradient = (y1-y2)/(x1-x2)
+      double grad = (positions.w-positions.y)/(positions.z-positions.x);    
       return grad;
     }
-  
 
+    //the function used to calculate the length between hands
     private double Get_length(Kinect.Body body)
     {
         Kinect.Joint sjt1 = body.Joints[Kinect.JointType.HandRight];
         Kinect.Joint sjt2 = body.Joints[Kinect.JointType.HandLeft];
-
+            //get the position of hands
         Vector3 righthand = GetVector3FromJoint(sjt1);
         Vector3 lefthand = GetVector3FromJoint(sjt2);
+        //create a new vector contain 2D position of lefthand and righthand
         Vector4 positions = new Vector4(lefthand.x, lefthand.y, righthand.x, righthand.y);
+        //magnitude= square root of ((y2-y1)^2+(x2-x1)^2)
         double length = Mathf.Sqrt((positions.w - positions.y) * (positions.w - positions.y) + (positions.z - positions.x) * (positions.z - positions.x));
         return length;
     }
