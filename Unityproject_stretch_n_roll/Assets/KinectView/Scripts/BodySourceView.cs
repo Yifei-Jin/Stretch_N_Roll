@@ -1,4 +1,5 @@
-//This is the script used to calculate the gradient and length using the data input from kinect
+//This is the script used to calculate the gradient and length between two hands using the data input from the kinect
+//This is part of the original kinect sciprt from the website
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,8 @@ public class BodySourceView : MonoBehaviour
 
     private Dictionary<Kinect.JointType, Kinect.JointType> _BoneMap = new Dictionary<Kinect.JointType, Kinect.JointType>()
     {
+        //Here we have removed all the joints exceot those that we needed to be tracked for the game
+        //Just the right and left hand components
         { Kinect.JointType.HandTipLeft, Kinect.JointType.HandLeft },
         { Kinect.JointType.ThumbLeft, Kinect.JointType.HandLeft },
         { Kinect.JointType.HandTipRight, Kinect.JointType.HandRight },
@@ -43,9 +46,8 @@ public class BodySourceView : MonoBehaviour
         {
             return;
         }
-
+        //Creating tracking ids and assigning the id to each joint in the body
         List<ulong> trackedIds = new List<ulong>();
-
         foreach(var body in data)
         {
             if (body == null)
@@ -95,12 +97,14 @@ public class BodySourceView : MonoBehaviour
 
     private GameObject CreateBodyObject(ulong id)
     {
+        //Creating a temporary body object when the kinect is connected to store the joints
         GameObject body = new GameObject("Body:" + id);
-
+        // Setting which joints we want to be added to this temporary body, from the left shoulder to the right hands
+        //The order of the joint list is given with the kinect package and we cannot change it
         for (Kinect.JointType jt = Kinect.JointType.HandLeft; jt <= Kinect.JointType.HandRight; jt=jt+4)
         {
             GameObject jointObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
+            //This came with the kinect package, here we are connecting the joints to each other by lines to resemble a person
             LineRenderer lr = jointObj.AddComponent<LineRenderer>();
             lr.SetVertexCount(2);
             lr.material = BoneMaterial;
@@ -160,14 +164,15 @@ public class BodySourceView : MonoBehaviour
     }
 
 
-    //the function used to get the vector contain the joint's position, (x,y,z)
+    /*This is a function that gets the x,y,z position of a joint inserted into its parameters
+   and equates each component of the postion into a vector of size 3*/
     private static Vector3 GetVector3FromJoint(Kinect.Joint joint)
     {
         return new Vector3(joint.Position.X * 10, joint.Position.Y * 10, joint.Position.Z * 10);
     }
 
 
-    //the function used to calculate the gradient between hands
+    //This function  is used to calculate the gradient between hands
     private double Get_gradient(Kinect.Body body)
     {
       Kinect.Joint sjt1 = body.Joints[Kinect.JointType.HandRight];
@@ -179,7 +184,7 @@ public class BodySourceView : MonoBehaviour
       Vector4 positions = new Vector4(lefthand.x, lefthand.y, righthand.x, righthand.y);
         //gradient = (y1-y2)/(x1-x2)
       double grad = (positions.w-positions.y)/(positions.z-positions.x);    
-      return grad;
+      return grad;  //returning the value of the gradient 
     }
 
     //the function used to calculate the length between hands
@@ -194,6 +199,6 @@ public class BodySourceView : MonoBehaviour
         Vector4 positions = new Vector4(lefthand.x, lefthand.y, righthand.x, righthand.y);
         //magnitude= square root of ((y2-y1)^2+(x2-x1)^2)
         double length = Mathf.Sqrt((positions.w - positions.y) * (positions.w - positions.y) + (positions.z - positions.x) * (positions.z - positions.x));
-        return length;
+        return length;  //returning the value of the length 
     }
 }
