@@ -390,7 +390,7 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 13990}
     - Class: 114
-      Script: {instanceID: 17722}
+      Script: {instanceID: 18818}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -447,7 +447,7 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 13990}
     - Class: 114
-      Script: {instanceID: 17926}
+      Script: {instanceID: 14396}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -845,7 +845,7 @@ ScriptsOnlyBuild:
     className: TMP_SpriteAnimator
   - hash:
       serializedVersion: 2
-      Hash: b2afc98836283dec013a27691180e129
+      Hash: 5620c46722405818bce3358830306df2
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: PlayerController
